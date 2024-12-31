@@ -140,7 +140,7 @@ document.getElementById('sairSobreNos').addEventListener('click', function () {
 document.addEventListener("DOMContentLoaded", function () {
   const loginText = document.getElementById("loginHeader");
   loginText.addEventListener("click", function () {
-    window.location.href = "/telalogin.html";
+    window.location.href = "telalogin.html";
   });
 });
 
@@ -168,48 +168,111 @@ document.getElementById('sairCarrinhosCompras').addEventListener('click', functi
 
 document.addEventListener("DOMContentLoaded", function () {
   const boxProdutos = document.getElementById("boxProdutos");
+  const produtoDetalhes = document.getElementById("produtoDetalhes");
+  const abaCarinhoDeCompras = document.getElementById("abaCarinhoDeCompras");
 
   let produtosDoLocalStorage = [];
 
   try {
-    produtosDoLocalStorage = JSON.parse(localStorage.getItem("produtos")) || [];
-    console.log("Produtos carregados do localStorage:", produtosDoLocalStorage); 
+      produtosDoLocalStorage = JSON.parse(localStorage.getItem("produtos")) || [];
+      console.log("Produtos carregados do localStorage:", produtosDoLocalStorage);
   } catch (e) {
-    console.error("Erro ao carregar produtos do localStorage:", e);
+      console.error("Erro ao carregar produtos do localStorage:", e);
   }
 
   if (produtosDoLocalStorage.length === 0) {
-    console.log("Nenhum produto encontrado no localStorage.");
-    return;
+      console.log("Nenhum produto encontrado no localStorage.");
+      return;
   }
 
+  
+  function abrirCarrinho() {
+      abaCarinhoDeCompras.style.visibility = 'visible';
+      abaCarinhoDeCompras.style.opacity = '1';
+  }
+
+  
+  function fecharCarrinho() {
+      abaCarinhoDeCompras.style.visibility = 'hidden';
+      abaCarinhoDeCompras.style.opacity = '0';
+  }
+
+  
   produtosDoLocalStorage.forEach(produto => {
-    const novaLinha = document.createElement("div");
-    novaLinha.classList.add("cardprodutos"); // Adicionando a classe cardprodutos
-    novaLinha.style.display = "flex";
-    novaLinha.style.justifyContent = "space-between";
-    novaLinha.style.marginBottom = "10px";
+      const novaLinha = document.createElement("div");
+      novaLinha.classList.add("cardprodutos");
 
-    const id = boxProdutos.children.length + 1; 
+      novaLinha.innerHTML = `
+          <span class="nome">${produto.nome}</span>
+          <span class="foto"></span>
+          <span class="quantidade">Quantidade disponível: <br>${produto.pedidos}</span>
+      `;
 
-    novaLinha.innerHTML = `
-      <span class="nome">${produto.nome}</span>
-      <span class="foto"></span>
-      <span class="quantidade">Quantidade disponivel: <br></span>
-      <span class="pedidos">${produto.pedidos}</span>
-    `;
+      const fotoElement = novaLinha.querySelector(".foto");
+      if (produto.foto && (produto.foto.startsWith("http") || produto.foto.startsWith("data:image"))) {
+          const img = document.createElement("img");
+          img.src = produto.foto;
+          img.style.width = "100px";
+          img.style.height = "auto";
+          fotoElement.appendChild(img);
+      } else {
+          fotoElement.textContent = "Sem foto";
+      }
 
-    const fotoElement = novaLinha.querySelector(".foto");
-    if (produto.foto && (produto.foto.startsWith("http") || produto.foto.startsWith("data:image"))) {
-      const img = document.createElement("img");
-      img.src = produto.foto; 
-      img.style.width = "100px";
-      img.style.height = "auto";
-      fotoElement.appendChild(img);
-    } else {
-      fotoElement.textContent = "Sem foto"; 
-    }
+      
+      novaLinha.addEventListener("click", function () {
+          
+          produtoDetalhes.style.display = "block";
 
-    boxProdutos.appendChild(novaLinha); 
+          
+          produtoDetalhes.innerHTML = `
+              <h2>${produto.nome}</h2>
+              <img src="${produto.foto}" alt="Foto do Produto" style="width: 200px; height: auto;" />
+              <p>Quantidade disponível: ${produto.pedidos}</p>
+              <button id="botaoPedir">Pedir</button>
+          `;
+
+          
+          const botaoPedir = produtoDetalhes.querySelector("#botaoPedir");
+          botaoPedir.addEventListener("click", function () {
+              
+              const botaoCarrinho = document.createElement("button");
+              botaoCarrinho.textContent = produto.nome; 
+              const imgCarrinho = document.createElement("img");
+              imgCarrinho.src = produto.foto; 
+              imgCarrinho.style.width = "50px";
+              imgCarrinho.style.height = "auto";
+              botaoCarrinho.prepend(imgCarrinho); 
+
+              
+              abaCarinhoDeCompras.appendChild(botaoCarrinho);
+
+              
+              abrirCarrinho();
+
+              
+              produtoDetalhes.style.display = "none";
+          });
+      });
+
+      boxProdutos.appendChild(novaLinha);
   });
-});
+
+  
+  document.addEventListener("click", function (e) {
+      if (!produtoDetalhes.contains(e.target) && !boxProdutos.contains(e.target)) {
+          produtoDetalhes.style.display = "none";
+      }
+  });
+
+  
+  const sairCarrinho = document.getElementById("sairCarrinhosCompras");
+  sairCarrinho.addEventListener("click", function () {
+      fecharCarrinho(); 
+  });
+
+  
+  const abrirCarrinhoBtn = document.getElementById("abrirCarrinhoBtn");
+  if (abrirCarrinhoBtn) {
+      abrirCarrinhoBtn.addEventListener("click", abrirCarrinho);
+}});

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            width: 200px;
+            background-color: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        header a {
+            text-decoration: none;
+            color: #000000;
+            font-size: 25px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        header a:hover {
+            background-color: #ddd;
+        }
+
+        header a:focus {
+            background-color: red;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            margin-left: 200px;
+        }
+
+        #produtos {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        #produtos button {
+            height: 45px;
+            width: 45px;
+            transition: 500ms linear;
+        }
+
+        #produtos button:hover {
+            background-color: red;
+            color: white;
+            border-radius: 5px;
+            border: 3px solid black;
+        }
+
+        #produtos button:focus {
+            background-color: red;
+            color: white;
+            border-radius: 5px;
+            border: 3px solid black;
+            transform: scale(1.2);
+        }
+
+        #listaProdutos div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            background-color: #f9f9f9;
+            transition: background-color 0.3s;
+        }
+
+        #listaProdutos div:hover {
+            background-color: #f0f0f0;
+        }
+
+        #adicionarProdutos {
+            height: 45px;
+            width: 45px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        #adicionarProdutos:hover {
+            background-color: red;
+            color: white;
+            border: 1px solid black;
+        }
+
+        #adicionarProdutos:focus {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="#" id="link-produtos">Produtos</a>
+        <a href="#" id="link-mensagens">Mensagens</a>
+        <a href="#" id="link-sobre">Sobre Nós</a>
+    </header>
+
+    <main>
+        <div id="produtos" class="content">
+            <a>Id</a>
+            <a>Nome</a>
+            <a>Foto</a>
+            <a>Pedido</a>
+            <a>Edição</a>
+            <button id="adicionarProdutos">+</button>
+        </div>
+
+        <div id="listaProdutos"></div>
+
+        <!-- Modal de edição -->
+        <div id="modalEditar" style="display:none;">
+            <input id="nomeEditarInput" placeholder="Nome" />
+            <input id="fotoEditarInput" placeholder="URL da Foto" />
+            <input id="pedidosEditarInput" placeholder="Pedidos" />
+            <button id="salvarEditarBtn">Salvar</button>
+            <button id="fecharModal">Fechar</button>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const listaProdutos = document.getElementById("listaProdutos");
+            const adicionarProdutosBtn = document.getElementById("adicionarProdutos");
+            const salvarEditarBtn = document.getElementById("salvarEditarBtn");
+            const nomeEditarInput = document.getElementById("nomeEditarInput");
+            const fotoEditarInput = document.getElementById("fotoEditarInput");
+            const pedidosEditarInput = document.getElementById("pedidosEditarInput");
+            const modalEditar = document.getElementById("modalEditar");
+            const fecharModal = document.getElementById("fecharModal");
+
+            let linhaParaEditar = null;
+
+            // Salvar no LocalStorage
+            function salvarProdutosNoLocalStorage() {
+                const produtos = [];
+                listaProdutos.querySelectorAll(".cardprodutos").forEach(linha => { // Seleciona por classe
+                    const produto = {
+                        nome: linha.querySelector(".nome").textContent,
+                        foto: linha.querySelector(".foto img") ? linha.querySelector(".foto img").src : linha.querySelector(".foto").textContent,
+                        pedidos: linha.querySelector(".pedidos").textContent,
+                    };
+                    produtos.push(produto);
+                });
+                localStorage.setItem("produtos", JSON.stringify(produtos));
+            }
+
+            // Criar uma nova linha de produto
+            function criarNovaLinha(nome = "Produto", foto = "Foto", pedidos = "0") {
+                const novaLinha = document.createElement("div");
+                novaLinha.classList.add("cardprodutos"); // Adiciona a classe cardprodutos
+                novaLinha.style.display = "flex";
+                novaLinha.style.justifyContent = "space-between";
+                novaLinha.style.marginBottom = "10px";
+
+                const id = listaProdutos.children.length + 1;
+
+                novaLinha.innerHTML = `
+            <span class="id">${id}</span>
+            <span class="nome">${nome}</span>
+            <span class="foto">${foto ? `<img src="${foto}" style="width: 100px; height: auto;" />` : 'Sem foto'}</span>
+            <span class="pedidos">${pedidos}</span>
+            <span>
+                <button class="editar">✏️</button>
+                <button class="remover">🗑️</button>
+            </span>
+        `;
+
+                novaLinha.querySelector(".remover").addEventListener("click", function () {
+                    novaLinha.remove();
+                    salvarProdutosNoLocalStorage();
+                });
+
+                novaLinha.querySelector(".editar").addEventListener("click", function () {
+                    nomeEditarInput.value = nome;
+                    fotoEditarInput.value = foto;
+                    pedidosEditarInput.value = pedidos;
+                    linhaParaEditar = novaLinha;
+                    modalEditar.style.display = "flex";
+                });
+
+                listaProdutos.appendChild(novaLinha);
+                salvarProdutosNoLocalStorage();
+            }
+
+            // Evento de adicionar produto
+            adicionarProdutosBtn.addEventListener("click", function () {
+                const nome = prompt("Digite o nome do produto:");
+                const foto = prompt("Digite o link da foto:");
+                const pedidos = prompt("Digite a quantidade de pedidos:");
+                if (nome && foto && pedidos) {
+                    criarNovaLinha(nome, foto, pedidos);
+                }
+            });
+
+            // Evento de salvar edição
+            salvarEditarBtn.addEventListener("click", function () {
+                if (linhaParaEditar) {
+                    linhaParaEditar.querySelector(".nome").textContent = nomeEditarInput.value;
+                    linhaParaEditar.querySelector(".foto").innerHTML = fotoEditarInput.value ? `<img src="${fotoEditarInput.value}" style="width: 100px; height: auto;" />` : 'Sem foto';
+                    linhaParaEditar.querySelector(".pedidos").textContent = pedidosEditarInput.value;
+                    salvarProdutosNoLocalStorage();
+                    modalEditar.style.display = "none";
+                }
+            });
+
+            // Fechar modal
+            fecharModal.addEventListener("click", function () {
+                modalEditar.style.display = "none";
+            });
+        });
+    </script>
+</body>
+
+</html>

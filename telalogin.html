@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockets Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sixtyfour+Convergence&display=swap"
+        rel="stylesheet">
+    <link rel="shortcut icon" href="/assets/download-removebg-preview (1).png" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Bebas Neue", sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: url(/assets/Fundo\ preto\ com\ foco\ de\ luz\ _\ Vetor\ Grátis.jfif);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        #container-login {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            height: 70vh;
+            width: 70vh;
+            border-radius: 5px;
+            background-color: rgba(114, 114, 114, 0.151);
+        }
+
+        #container-login p {
+            text-align: center;
+            font-size: 40px;
+            margin-top: 2vh;
+            color: rgba(255, 250, 250, 0.808);
+            text-decoration-line: overline underline;
+        }
+
+        #container-login input {
+            margin-top: 5vh;
+            height: 10vh;
+            width: 40vh;
+            border-radius: 7px;
+            text-align: center;
+            background-color: rgba(223, 31, 31, 0.623);
+        }
+
+        #inputusuario, #inputsenha{
+            background-color: rgba(141, 141, 141, 0.5);
+        }
+
+        #inputusuario:hover,
+        #inputsenha:hover {
+            border: 2px solid black;
+            border-radius: 2px;
+            box-shadow: 2px 2px 10px black;
+            background-color: rgba(0, 0, 0, 0.678);
+        }
+
+        #buttonlogin,
+        #buttonsignup {
+            height: 10vh;
+            width: 20vh;
+            background-color: red;
+            border-radius: 5px;
+            margin-top: 5vh;
+        }
+
+        #mensagem {
+            text-align: center;
+            font-size: 30px;
+            margin-top: 2vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container-login">
+        <img src="/assets/Tapatia by no-gimmicks.jfif" height="85px" width="85px" alt="" srcset="">
+        <input type="text" placeholder="Digite seu usuário" id="inputusuario">
+        <input type="password" placeholder="Digite sua senha" id="inputsenha">
+        <button id="buttonlogin">Entrar</button>
+        <button id="buttonsignup">Criar Conta</button>
+        <div id="mensagem"></div>
+    </div>
+
+    <script>
+        const sino3 = new Audio("/assets/sino2.mp3");
+
+        function saveUser(username, password) {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.some(user => user.username === username)) return false;
+            users.push({ username, password });
+            localStorage.setItem('users', JSON.stringify(users));
+            return true;
+        }
+
+        function loginUser(username, password) {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            return users.some(user => user.username === username && user.password === password);
+        }
+
+        document.getElementById('buttonlogin').addEventListener('click', function () {
+            const usuario = document.getElementById('inputusuario').value;
+            const senha = document.getElementById('inputsenha').value;
+
+            if (!usuario || !senha) {
+                document.getElementById('mensagem').textContent = "Por favor, preencha os campos.";
+                document.getElementById('mensagem').style.color = "red";
+                return;
+            }
+
+            if (loginUser(usuario, senha)) {
+                document.getElementById('mensagem').textContent = "Login bem-sucedido!";
+                document.getElementById('mensagem').style.color = "green";
+                sino3.play();
+
+                setTimeout(() => {
+                    if (usuario === "admin" && senha === "1234") {
+                        window.location.href = "/FRONTEND/areaAdminstrador/index.html";
+                    } else {
+                        window.location.href = "/FRONTEND/index.html";
+                    }
+                }, 1100);
+            } else {
+                document.getElementById('mensagem').textContent = "Usuário ou senha incorretos.";
+                document.getElementById('mensagem').style.color = "red";
+            }
+        });
+
+        document.getElementById('buttonsignup').addEventListener('click', function () {
+            const usuario = document.getElementById('inputusuario').value;
+            const senha = document.getElementById('inputsenha').value;
+
+            if (!usuario || !senha) {
+                document.getElementById('mensagem').textContent = "Por favor, preencha os campos.";
+                document.getElementById('mensagem').style.color = "red";
+                return;
+            }
+
+            if (saveUser(usuario, senha)) {
+                document.getElementById('mensagem').textContent = "Conta criada com sucesso!";
+                document.getElementById('mensagem').style.color = "green";
+            } else {
+                document.getElementById('mensagem').textContent = "Nome de usuário já existe.";
+                document.getElementById('mensagem').style.color = "red";
+            }
+        });
+    </script>
+</body>
+
+</html>

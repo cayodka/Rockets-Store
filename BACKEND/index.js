@@ -1,36 +1,92 @@
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-
-const app = express();
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
 
-app.use(express.static(path.join(__dirname)));
+const server = http.createServer((req, res) => {
+  const url = req.url;
 
+  switch (url) {
+    case '/': 
+      fs.readFile('./FRONTEND/index.html', (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Página inicial não encontrada.');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(data);
+        }
+      });
+      break;
 
-app.get('/listarArquivos', (req, res) => {
-    
-    const files = [];
-    
-    
-    fs.readdirSync(path.join(__dirname)).forEach(file => {
-        files.push(file);
-    });
-    
-    
-    fs.readdirSync(path.join(__dirname, 'frontend')).forEach(file => {
-        files.push(`frontend/${file}`);
-    });
-    
-    
-    fs.readdirSync(path.join(__dirname, 'frontend', 'areaAdminstrador')).forEach(file => {
-        files.push(`frontend/areaAdminstrador/${file}`);
-    });
+    case '/areaAdministrador': // Página da área do administrador
+      fs.readFile('./FRONTEND/areaAdministrador/index.html', (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Página da área do administrador não encontrada.');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(data);
+        }
+      });
+      break;
 
-    res.json(files); 
+    case '/style.css': // CSS da página inicial
+      fs.readFile('./FRONTEND/style.css', (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('CSS não encontrado.');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/css' });
+          res.end(data);
+        }
+      });
+      break;
+
+    case '/areaAdministrador/style.css': // CSS da área do administrador
+      fs.readFile('./FRONTEND/areaAdministrador/style.css', (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('CSS da área do administrador não encontrado.');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/css' });
+          res.end(data);
+        }
+      });
+      break;
+
+    case '/main.js': // JavaScript da página inicial
+      fs.readFile('./FRONTEND/main.js', (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('JavaScript não encontrado.');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'application/javascript' });
+          res.end(data);
+        }
+      });
+      break;
+
+    case '/areaAdministrador/index.js': // JavaScript da área do administrador
+      fs.readFile('./FRONTEND/areaAdministrador/index.js', (err, data) => {
+        if (err) {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('JavaScript da área do administrador não encontrado.');
+        } else {
+          res.writeHead(200, { 'Content-Type': 'application/javascript' });
+          res.end(data);
+        }
+      });
+      break;
+
+    default:
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Rota não encontrada.');
+      break;
+  }
 });
 
 
-app.listen(1010, () => {
-    console.log("Servidor rodando em http://localhost:1010");
+server.listen(3000, () => {
+  console.log('Servidor rodando em http://localhost:3000/');
 });
